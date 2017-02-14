@@ -1,0 +1,31 @@
+=================================================================
+"ToDoList.txt" keeps track of features awaited to be implemented.
+
+// File created on 2017.02.14
+//
+// When updating this file, please use the following messeage
+//
+//		updated ToDoList.txt
+//
+// for git commit message, to keep log clean.
+==================================================================
+
+
+Zeyu's Tasks:
+1. updateBoard code optimization
+	a. down
+	b. right
+
+
+Louis' Tasks:
+1. restart game
+	a. discuss with Zeyu to see where to call restart, 2 possible places
+		i. main function
+		ii.updateBoard function
+2. score count
+	a. will possibly add new variable, currentScore, to struct BOARD
+	b. need to sort out score counting algorithm first
+
+
+Shared Tasks:
+1. bridge with QT
