@@ -73,7 +73,7 @@ void deleteBoard(struct BOARD *A){
 // This function prints the board in 2048's manner (4x4).
 void printBoard(struct BOARD *A){
     
-    printf("Current board is as follows\n");
+    printf("\nCurrent board is as follows\n");
     printf("===========================\n");
     
     for(int i = 0; i < 4; i++){
@@ -83,7 +83,7 @@ void printBoard(struct BOARD *A){
         printf("\n");
     }
     
-    printf("===========================\n\n");
+    printf("===========================\n");
     return;
 }
 
@@ -430,7 +430,20 @@ bool playable(struct BOARD *A){
 
 // main function
 int main(int argc, const char * argv[]) {
-    
+   
+    // introduction message
+    printf("\n===================================================\n");
+    printf("Welcome to 2048 command line game!\n");
+    printf("                developed by Louis Chen & Zeyu Fan!\n\n");
+    printf("Some useful commands as follows:\n");
+    printf("        w: shift up\n");
+    printf("        s: shift down\n");
+    printf("        a: shift left\n");
+    printf("        d: shift right\n");
+    printf("        r: restart game\n");
+    printf("        q: exit game\n");
+    printf("===================================================\n\n");
+
     char direction = 'w';
     char empty;
     
@@ -441,13 +454,16 @@ int main(int argc, const char * argv[]) {
 
     printf("Please enter next direction: ");
     direction = getchar();
+
     while(direction == '\n' && direction != 'q'){
         
         printf("Please enter next direction: ");
         direction = getchar();
     }
-    empty = getchar();
-    
+    // get rid of all chars after first char in stdio
+    do empty = getchar();
+    while(empty != '\n');
+
     while(direction != 'q' ){
         
         updateBoard(A, direction);
@@ -460,12 +476,14 @@ int main(int argc, const char * argv[]) {
         
         printf("Please enter next direction: ");
         direction = getchar();
+
         while(direction == '\n' && direction != 'q'){
             
             printf("Please enter next direction: ");
             direction = getchar();
         }
-        empty = getchar();
+        do empty = getchar();
+    	while(empty != '\n');
     }
     
     printf("\n");
