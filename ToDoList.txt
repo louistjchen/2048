@@ -11,21 +11,35 @@
 ==================================================================
 
 
-Zeyu's Tasks:
+
+
+========================================Zeyu's Tasks========================================
 1. updateBoard code optimization
 	a. down
 	b. right
+============================================================================================
 
 
-Louis' Tasks:
+========================================Louis' Tasks========================================
 1. restart game
-	a. discuss with Zeyu to see where to call restart, 2 possible places
-		i. main function
-		ii.updateBoard function
+	a. function itself has been implemented, called restartBoard(struct BOARD *A);
+	b. discuss with Zeyu to see where to call restart, 2 possible places
+		i.  main function
+		ii. updateBoard function
+
 2. score count
-	a. will possibly add new variable, currentScore, to struct BOARD
-	b. need to sort out score counting algorithm first
+	a. have added variable "score" in struct BOARD
+	b. score counting algorithm
+		i.   initialize score to 0 in initBoard() & restartBoard()
+		ii.  update score every time there's a valid pushCombine() action
+		     update it inside updateBoard()
+		iii. print score in printBoard()
+============================================================================================
 
 
-Shared Tasks:
-1. bridge with QT
+========================================Shared Tasks========================================
+1. adjustable game level (probability of the next number 2 or 4)
+2. bridge with QT
+============================================================================================
+
+

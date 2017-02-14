@@ -18,6 +18,7 @@ struct BOARD{
     
     int **board;
     int numEmpty;
+    int score;
 };
 
 
@@ -31,7 +32,7 @@ int randomFromRange(int min, int max){
 
 
 // function initBoard
-// This function memory-allocates a struct, a 2D array. It initializes 2D array to have 2 2's.
+// This function memory-allocates a struct, a 2D array. It initializes 2D array to have 2 2's in random positions.
 struct BOARD *initBoard(struct BOARD *A){
     
     A = (struct BOARD *)malloc(sizeof(struct BOARD));
@@ -52,19 +53,43 @@ struct BOARD *initBoard(struct BOARD *A){
     A->board[second/4][second%4] = 2;
     
     A->numEmpty = 14;
+    A->score = 0;
     
     return A;
 }
 
 
 // function deleteBoard
-// This functions frees the 2D array of board and the entire struct.
+// This function frees the 2D array of board and the entire struct.
 void deleteBoard(struct BOARD *A){
     
     for(int i = 0; i < 4; i++)
         free(A->board[i]);
     free(A->board);
     free(A);
+    return;
+}
+
+
+// function restartBoard
+// This function restarts the game. It reintializes game to have 2 2's in random positions.
+void restartBoard(struct BOARD *A){
+
+    for(int i = 0; i < 4; i++)
+        for(int j = 0; j < 4; j++)
+            A->board[i][j] = 0;
+    
+    int first = randomFromRange(0, 15);
+    int second = first;
+    while(second == first)
+        second = randomFromRange(0, 15);
+    
+    A->board[first/4][first%4] = 2;
+    A->board[second/4][second%4] = 2;
+    
+    A->numEmpty = 14;
+    A->score = 0;
+
     return;
 }
 
@@ -80,10 +105,11 @@ void printBoard(struct BOARD *A){
         for(int j = 0; j < 4; j++)
             if(A->board[i][j] == 0) printf("     ");
             else printf("%5.d", A->board[i][j]);
-        printf("\n");
+        printf("\n\n");
     }
     
     printf("===========================\n");
+    printf("Your current score: %d\n", A->score);
     return;
 }
 
@@ -225,8 +251,8 @@ void recountNumEmpty(struct BOARD *A){
 
 
 // function "updateBoard"
-// This function updates the board after certain direction is detected. If there is a move, it inserts new number 2 or 4.
-void updateBoard(struct BOARD *A, char direction){
+// This function updates the board after certain command is detected. If there is a move, it inserts new number 2 or 4.
+void updateBoard(struct BOARD *A, char command){
     
     int array1[4] = {0,0,0,0};
     int array2[4] = {0,0,0,0};
@@ -238,7 +264,7 @@ void updateBoard(struct BOARD *A, char direction){
     int old_array4[4] = {0,0,0,0};
     bool moved = false;
     
-    switch(direction){
+    switch(command){
             
         case 'w':
             arrayReset(array1, A->board[0][0], A->board[1][0], A->board[2][0], A->board[3][0]);
@@ -428,10 +454,10 @@ bool playable(struct BOARD *A){
 }
 
 
-// main function
-int main(int argc, const char * argv[]) {
-   
-    // introduction message
+// function printHelper Menu
+// This function prints the welcome message followed by valid commands
+void printHelperMenu(){
+
     printf("\n===================================================\n");
     printf("Welcome to 2048 command line game!\n");
     printf("                developed by Louis Chen & Zeyu Fan!\n\n");
@@ -442,9 +468,20 @@ int main(int argc, const char * argv[]) {
     printf("        d: shift right\n");
     printf("        r: restart game\n");
     printf("        q: exit game\n");
+    printf("  ****  h: help\n");
     printf("===================================================\n\n");
 
-    char direction = 'w';
+    return;
+}
+
+
+// main function
+int main(int argc, const char * argv[]) {
+   
+    // introduction message
+    printHelperMenu();    
+
+    char command;
     char empty;
     
     struct BOARD *A = NULL;
@@ -452,21 +489,27 @@ int main(int argc, const char * argv[]) {
     A = initBoard(A);
     printBoard(A);
 
-    printf("Please enter next direction: ");
-    direction = getchar();
+    printf("Please enter command (h: help): ");
+    command = getchar();
 
-    while(direction == '\n' && direction != 'q'){
+    while((command == '\n' && command != 'q') || command == 'h'){
         
-        printf("Please enter next direction: ");
-        direction = getchar();
+	if(command == 'h')
+	    printHelperMenu();
+        // get rid of all chars after first char in stdio
+        // Don't do if first char is '\n'
+        if(command != '\n')
+            do empty = getchar();
+            while(empty != '\n');
+        printf("Please enter command (h: help): ");
+        command = getchar();
     }
-    // get rid of all chars after first char in stdio
     do empty = getchar();
     while(empty != '\n');
 
-    while(direction != 'q' ){
+    while(command != 'q' ){
         
-        updateBoard(A, direction);
+        updateBoard(A, command);
         printBoard(A);
         
         if(!playable(A)){
@@ -474,13 +517,18 @@ int main(int argc, const char * argv[]) {
             break;
         }
         
-        printf("Please enter next direction: ");
-        direction = getchar();
+        printf("Please enter command (h: help): ");
+        command = getchar();
 
-        while(direction == '\n' && direction != 'q'){
+        while((command == '\n' && command != 'q') || command== 'h'){
             
-            printf("Please enter next direction: ");
-            direction = getchar();
+	    if(command == 'h')
+		printHelperMenu();
+	    if(command != '\n')
+    	        do empty = getchar();
+	        while(empty != '\n');
+            printf("Please enter command (h: help): ");
+            command = getchar();
         }
         do empty = getchar();
     	while(empty != '\n');
