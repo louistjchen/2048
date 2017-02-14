@@ -31,9 +31,12 @@ struct BOARD *initBoard(struct BOARD *A){
     A = (struct BOARD *)malloc(sizeof(struct BOARD));
     
     A->board = (int **)malloc(sizeof(int*)*4);
-    for(int i = 0; i < 4; i ++)
-        A->board[i] = (int *)malloc(sizeof(int)*4);
-    
+    for(int i = 0; i < 4; i ++) {
+        A->board[i] = (int *)malloc(sizeof(int)*4);{
+	for (int j = 0; j < 4; j++)
+		A->board[i][j] = 0;
+	}
+    }
     int first = randomFromRange(0, 15);
     int second = first;
     while(second == first)
@@ -383,7 +386,7 @@ int main(int argc, const char * argv[]) {
     char direction = 'w';
     char empty;
     
-    struct BOARD *A;
+    struct BOARD *A = {0};
     
     A = initBoard(A);
     printBoard(A);
