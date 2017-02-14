@@ -12,13 +12,17 @@
 #include <time.h>
 
 
+
+// basic struct of BOARD
 struct BOARD{
     
     int **board;
-    int numZero;
+    int numEmpty;
 };
 
 
+// function randomFromRange
+// This function returns a random number between arguments min/max. It takes current time (seconds) as its seed to avoid repetition.
 int randomFromRange(int min, int max){
     
     time_t current_time = time(NULL);
@@ -26,6 +30,8 @@ int randomFromRange(int min, int max){
 }
 
 
+// function initBoard
+// This function memory-allocates a struct, a 2D array. It initializes 2D array to have 2 2's.
 struct BOARD *initBoard(struct BOARD *A){
     
     A = (struct BOARD *)malloc(sizeof(struct BOARD));
@@ -45,12 +51,14 @@ struct BOARD *initBoard(struct BOARD *A){
     A->board[first/4][first%4] = 2;
     A->board[second/4][second%4] = 2;
     
-    A->numZero = 14;
+    A->numEmpty = 14;
     
     return A;
 }
 
 
+// function deleteBoard
+// This functions frees the 2D array of board and the entire struct.
 void deleteBoard(struct BOARD *A){
     
     for(int i = 0; i < 4; i++)
@@ -61,6 +69,8 @@ void deleteBoard(struct BOARD *A){
 }
 
 
+// function printBoard
+// This function prints the board in 2048's manner (4x4).
 void printBoard(struct BOARD *A){
     
     printf("Current board is as follows\n");
@@ -78,6 +88,8 @@ void printBoard(struct BOARD *A){
 }
 
 
+// function arrayEqual
+// This function copies array b to array a. It return true if they are equal; vice versa.
 bool arrayEqual(int *a, int *b, int size){
     
     bool moved = false;
@@ -91,6 +103,8 @@ bool arrayEqual(int *a, int *b, int size){
 }
 
 
+// function arrayReset
+// This function resets an array size of 4 with a, b, c, d.
 void arrayReset(int *array, int a, int b, int c, int d){
     
     array[0] = a;
@@ -101,6 +115,8 @@ void arrayReset(int *array, int a, int b, int c, int d){
 }
 
 
+// function "pushZero
+// This function pushes an array's internal 0's to end of array, if any.
 int *pushZero(int *array){
     
     int new_array[4] = {0,0,0,0};
@@ -117,6 +133,8 @@ int *pushZero(int *array){
 }
 
 
+// function "pushCombine"
+// This function adds up an array's internal adjacent elements if they are equal.
 int *pushCombine(int *array){
     
     int i = 0;
@@ -147,6 +165,8 @@ int *pushCombine(int *array){
 }
 
 
+// function "insertNewNum"
+// This function inserts a random 2 or 4 (probability is defined below) to board. It assumes there's always empty space to insert.
 void insertNewNum(struct BOARD *A){
     
     int index = 0;
@@ -164,6 +184,9 @@ void insertNewNum(struct BOARD *A){
                 size++;
             }
     }
+    
+    // can remove because this function assumes there's always empty space to insert
+    // but leave for debug
     if(!set){
         
         printf("No more empty space to add 2\n");
@@ -184,19 +207,25 @@ void insertNewNum(struct BOARD *A){
 }
 
 
-void recountNumZero(struct BOARD *A){
+
+// function "recountNumEmpty"
+// This function keeps track of number of empty spaces.
+void recountNumEmpty(struct BOARD *A){
     
-    A->numZero = 0;
+    A->numEmpty = 0;
     
     for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; j++)
             if(A->board[i][j] == 0)
-                A->numZero++;
+                A->numEmpty++;
     
     return;
 }
 
 
+
+// function "updateBoard"
+// This function updates the board after certain direction is detected. If there is a move, it inserts new number 2 or 4.
 void updateBoard(struct BOARD *A, char direction){
     
     int array1[4] = {0,0,0,0};
@@ -355,42 +384,61 @@ void updateBoard(struct BOARD *A, char direction){
     if(moved)
         insertNewNum(A);
     
-    recountNumZero(A);
+    recountNumEmpty(A);
     
     return;
 }
 
 
-bool endOfGame(struct BOARD *A){
+// function "playableRecursion"
+// This is a recursive helper function for function "playable", and should always be launched from A[0][0].
+bool playableRecursion(struct BOARD *A, int row, int col){
     
-    if(A->numZero > 0)
+    // return false if 2 out-of-bound cases
+    if(row == 4 || col == 4)
+        return false;
+    if(row == 3 && col == 3)
         return false;
     
-    bool dead = true;
-    for(int i = 0; i < 4; i++){
-        
-        for(int j = 0; j < 4; j++){
-            
-            // insert code here
-            // may use updateBoard() 4 times
-        }
-    }
+    // return equal? if 2 limit cases
+    if(row == 3)
+        return (A->board[row][col] == A->board[row][col+1]);
+    if(col == 3)
+        return (A->board[row][col] == A->board[row+1][col]);
     
-    return dead;
+    // return true (playable) if right or down is equal
+    if(A->board[row][col] == A->board[row][col+1])
+        return true;
+    if(A->board[row][col] == A->board[row+1][col])
+        return true;
+    
+    // recursively search right/down if not base case nor equal adjacent found
+    return playableRecursion(A, row, col+1) | playableRecursion(A, row+1, col);
 }
 
 
+// function "playable"
+// This function returns false if game no longer valid to play, and vice versa.
+bool playable(struct BOARD *A){
+    
+    if(A->numEmpty > 0)
+        return true;
+    
+    return playableRecursion(A, 0, 0);
+}
 
+
+// main function
 int main(int argc, const char * argv[]) {
     
     char direction = 'w';
     char empty;
     
-    struct BOARD *A = {0};
+    struct BOARD *A = NULL;
     
     A = initBoard(A);
     printBoard(A);
-    
+
     printf("Please enter next direction: ");
     direction = getchar();
     while(direction == '\n' && direction != 'q'){
@@ -405,8 +453,7 @@ int main(int argc, const char * argv[]) {
         updateBoard(A, direction);
         printBoard(A);
         
-        // break if dead
-        if(endOfGame(A)){
+        if(!playable(A)){
             printf("Gameover!\n");
             break;
         }
@@ -422,6 +469,7 @@ int main(int argc, const char * argv[]) {
     }
     
     printf("\n");
+    
     deleteBoard(A);
     
     return 0;
