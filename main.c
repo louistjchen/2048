@@ -113,83 +113,170 @@ void printBoard(struct BOARD *A){
     return;
 }
 
+int findNextNonzeroEntry(int **board, int row, int col, char dir) {
+	
+	int result = 0;
 
-// function arrayEqual
-// This function copies array b to array a. It return true if they are equal; vice versa.
-bool arrayEqual(int *a, int *b, int size){
-    
-    bool moved = false;
-    for(int i = 0; i < size; i++){
-        
-        if(a[i] != b[i])
-            moved = true;
-        a[i] = b[i];
-    }
-    return moved;
+	switch (dir) {
+	case 'a': {
+		for (int i = col; col < 4; col++) { // search in increasing direction, which is rightward.
+			if (board[row][col] != 0)
+				return col;
+		}
+		result = 4;
+		break;
+	}
+
+	case 'w': {
+		for (int i = row; row < 4; row++) { // search in increasing direction, which is rightward.
+			if (board[row][col] != 0)
+				return row;
+		}
+		result = 4;
+		break;
+	}
+
+	case 'd': {
+		for (int i = col; col >= 0 ; col--) { // search in increasing direction, which is rightward.
+			if (board[row][col] != 0)
+				return col;
+		}
+		result = -1;
+		break;
+	}
+
+	case 's': {
+		for (int i = row; row >= 0; row--) { // search in increasing direction, which is rightward.
+			if (board[row][col] != 0)
+				return row;
+		}
+		result = -1;
+		break;
+	}
+
+	default:
+		break;
+	}
+	return result;
 }
 
-
-// function arrayReset
-// This function resets an array size of 4 with a, b, c, d.
-void arrayReset(int *array, int a, int b, int c, int d){
-    
-    array[0] = a;
-    array[1] = b;
-    array[2] = c;
-    array[3] = d;
-    return;
+bool updateLeftUp(int **board, char dir) {
+	bool moved = false;
+	for (int i = 0; i < 4; i++) {
+		int j = 0;
+		int k = 0;
+		for (; j < 4; j++) {
+			int val = 0;
+			if (k > 3) {  // The next date entry point is out of range, means the rest value for this column/row will be 0.
+				val = 0;
+				k = 4;
+			}
+			else if (k == 3) { // The next date entry point is the last (i.e fourth) element of this row/column.
+				val = (dir == 'a') ? board[i][k] : board[k][i];
+				k = 4;
+			}
+			else if (k < 3) {
+				int n1 = findNextNonzeroEntry(board, (dir == 'a') ? i : k, (dir == 'a') ? k : i, dir);
+				if (n1 > 3) { //The next nonzero date entry does not exist. thus make rest column/row all 0.
+					val = 0;
+					k = 4;
+				}
+				else if (n1 == 3) {
+					val = (dir == 'a') ? board[i][n1] : board[n1][i];
+					k = 4; //Set the next dataentry point to be 4, which is out of 0-3 range, make rest values in column/row all 0.
+				}
+				else if (n1 < 3) {
+					int n2 = findNextNonzeroEntry(board, (dir == 'a') ? i : n1 + 1, (dir == 'a') ? n1 + 1 : i, dir);
+					if (n2 > 3) {
+						val = (dir == 'a') ? board[i][n1] : board[n1][i]; //  Set current value to the only found nonzero value left, which is board[i][n1].
+						k = 4;
+					}
+					else if (n2 <= 3) { // There are at least two nonzero values left to be continued, check if they equal.
+						if (dir == 'a' && board[i][n1] == board[i][n2]
+							|| dir == 'w' && board[n1][i] == board[n2][i]) {
+							val = ((dir == 'a') ? board[i][n1] : board[n1][i]) * 2;
+							k = n2 + 1;
+						}
+						else {
+							val = (dir == 'a') ? board[i][n1] : board[n1][i];
+							k = n1 + 1;
+						}
+					}
+				}
+			}
+			if (dir == 'a') {
+				if (!moved)
+					moved = (board[j][i] == val) ? false : true;
+				board[i][j] = val;
+			}
+			else {
+				if (!moved)
+					moved = (board[j][i] == val) ? false : true;
+				board[j][i] = val;
+			}
+		}
+	}
+	return moved;
 }
 
-
-// function "pushZero
-// This function pushes an array's internal 0's to end of array, if any.
-int *pushZero(int *array){
-    
-    int new_array[4] = {0,0,0,0};
-    int index = 0;
-    
-    for(int i = 0; i < 4; i++)
-        if(array[i] != 0){
-            new_array[index] = array[i];
-            index++;
-        }
-    arrayEqual(array, new_array, 4);
-
-    return array;
+bool updateRightDown(int **board, char dir) {
+	bool moved = false;
+	for (int i = 0; i < 4; i++) {
+		int j = 3;
+		int k = 3;
+		for (; j >= 0; j--) {
+			int val = 0;
+			if (k < 0) {  // The next date entry point is out of range, means the rest value for this column/row will be 0.
+				val = 0;
+				k = -1;
+			}
+			else if (k == 0) { // The next date entry point is the last (i.e fourth) element of this row/column.
+				val = (dir == 'd') ? board[i][k] : board[k][i];
+				k = -1;
+			}
+			else if (k > 0) {
+				int n1 = findNextNonzeroEntry(board, (dir == 'd') ? i : k, (dir == 'd') ? k : i, dir);
+				if (n1 < 0) { //The next nonzero date entry does not exist. thus make rest column/row all 0.
+					val = 0;
+					k = -1;
+				}
+				else if (n1 == 0) {
+					val = (dir == 'd') ? board[i][n1] : board[n1][i];
+					k = -1; //Set the next dataentry point to be 4, which is out of 0-3 range, make rest values in column/row all 0.
+				}
+				else if (n1 > 0) {
+					int n2 = findNextNonzeroEntry(board, (dir == 'd') ? i : n1 - 1, (dir == 'd') ? n1 - 1 : i, dir);
+					if (n2 < 0) {
+						val = (dir == 'd') ? board[i][n1] : board[n1][i]; //  Set current value to the only found nonzero value left, which is board[i][n1].
+						k = -1;
+					}
+					else if (n2 >= 0) { // There are at least two nonzero values left to be continued, check if they equal.
+						if (dir == 'd' && board[i][n1] == board[i][n2]
+							|| dir == 's' && board[n1][i] == board[n2][i]) {
+							val = ((dir == 'd') ? board[i][n1] : board[n1][i]) * 2;
+							k = n2 - 1;
+						}
+						else {
+							val = (dir == 'd') ? board[i][n1] : board[n1][i];
+							k = n1 - 1;
+						}
+					}
+				}
+			}
+			if (dir == 'd') {
+				if (!moved)
+					moved = (board[i][j] == val) ? false : true;
+				board[i][j] = val;
+			}
+			else {
+				if (!moved)
+					moved = (board[j][i] == val) ? false : true;
+				board[j][i] = val;
+			}
+		}
+	}
+	return moved;
 }
-
-
-// function "pushCombine"
-// This function adds up an array's internal adjacent elements if they are equal.
-int *pushCombine(int *array){
-    
-    int i = 0;
-    int j = 0;
-    for (; i < 4;) {
-        
-        if(j < 3) { // j , j+1 entry both in range
-            if(array[j] == array [j+1]) {
-                array[i] = 2 * array[j];
-                j = j + 2;
-            }
-            else {
-                array[i] = array[j];
-                j++;
-            }
-        }
-        else if(j == 3) { // j is last entry
-            array[i] = array[j];
-            j++;
-        }
-        else if(j > 3)   // j out of range
-            array[i] = 0;
-        
-        i++;
-        
-    }
-    return array;
-}
-
 
 // function "insertNewNum"
 // This function inserts a random 2 or 4 (probability is defined below) to board. It assumes there's always empty space to insert.
@@ -254,156 +341,24 @@ void recountNumEmpty(struct BOARD *A){
 // This function updates the board after certain command is detected. If there is a move, it inserts new number 2 or 4.
 void updateBoard(struct BOARD *A, char command){
     
-    int array1[4] = {0,0,0,0};
-    int array2[4] = {0,0,0,0};
-    int array3[4] = {0,0,0,0};
-    int array4[4] = {0,0,0,0};
-    int old_array1[4] = {0,0,0,0};
-    int old_array2[4] = {0,0,0,0};
-    int old_array3[4] = {0,0,0,0};
-    int old_array4[4] = {0,0,0,0};
     bool moved = false;
     
     switch(command){
             
-        case 'w':
-            arrayReset(array1, A->board[0][0], A->board[1][0], A->board[2][0], A->board[3][0]);
-            arrayReset(array2, A->board[0][1], A->board[1][1], A->board[2][1], A->board[3][1]);
-            arrayReset(array3, A->board[0][2], A->board[1][2], A->board[2][2], A->board[3][2]);
-            arrayReset(array4, A->board[0][3], A->board[1][3], A->board[2][3], A->board[3][3]);
-            arrayReset(old_array1, A->board[0][0], A->board[1][0], A->board[2][0], A->board[3][0]);
-            arrayReset(old_array2, A->board[0][1], A->board[1][1], A->board[2][1], A->board[3][1]);
-            arrayReset(old_array3, A->board[0][2], A->board[1][2], A->board[2][2], A->board[3][2]);
-            arrayReset(old_array4, A->board[0][3], A->board[1][3], A->board[2][3], A->board[3][3]);
-            
-            pushCombine(pushZero(array1));
-            pushCombine(pushZero(array2));
-            pushCombine(pushZero(array3));
-            pushCombine(pushZero(array4));
-            moved = arrayEqual(old_array1, array1, 4) | arrayEqual(old_array2, array2, 4) | arrayEqual(old_array3, array3, 4) | arrayEqual(old_array4, array4, 4);
-
-            A->board[0][0] = array1[0];
-            A->board[1][0] = array1[1];
-            A->board[2][0] = array1[2];
-            A->board[3][0] = array1[3];
-            A->board[0][1] = array2[0];
-            A->board[1][1] = array2[1];
-            A->board[2][1] = array2[2];
-            A->board[3][1] = array2[3];
-            A->board[0][2] = array3[0];
-            A->board[1][2] = array3[1];
-            A->board[2][2] = array3[2];
-            A->board[3][2] = array3[3];
-            A->board[0][3] = array4[0];
-            A->board[1][3] = array4[1];
-            A->board[2][3] = array4[2];
-            A->board[3][3] = array4[3];
-            
+        case 'w':      
+			moved = updateLeftUp(A->board, 'w');
             break;
             
-        case 's':
-            arrayReset(array1, A->board[3][0], A->board[2][0], A->board[1][0], A->board[0][0]);
-            arrayReset(array2, A->board[3][1], A->board[2][1], A->board[1][1], A->board[0][1]);
-            arrayReset(array3, A->board[3][2], A->board[2][2], A->board[1][2], A->board[0][2]);
-            arrayReset(array4, A->board[3][3], A->board[2][3], A->board[1][3], A->board[0][3]);
-            arrayReset(old_array1, A->board[3][0], A->board[2][0], A->board[1][0], A->board[0][0]);
-            arrayReset(old_array2, A->board[3][1], A->board[2][1], A->board[1][1], A->board[0][1]);
-            arrayReset(old_array3, A->board[3][2], A->board[2][2], A->board[1][2], A->board[0][2]);
-            arrayReset(old_array4, A->board[3][3], A->board[2][3], A->board[1][3], A->board[0][3]);
-            
-            pushCombine(pushZero(array1));
-            pushCombine(pushZero(array2));
-            pushCombine(pushZero(array3));
-            pushCombine(pushZero(array4));
-            moved = arrayEqual(old_array1, array1, 4) | arrayEqual(old_array2, array2, 4) | arrayEqual(old_array3, array3, 4) | arrayEqual(old_array4, array4, 4);
-            
-            A->board[0][0] = array1[3];
-            A->board[1][0] = array1[2];
-            A->board[2][0] = array1[1];
-            A->board[3][0] = array1[0];
-            A->board[0][1] = array2[3];
-            A->board[1][1] = array2[2];
-            A->board[2][1] = array2[1];
-            A->board[3][1] = array2[0];
-            A->board[0][2] = array3[3];
-            A->board[1][2] = array3[2];
-            A->board[2][2] = array3[1];
-            A->board[3][2] = array3[0];
-            A->board[0][3] = array4[3];
-            A->board[1][3] = array4[2];
-            A->board[2][3] = array4[1];
-            A->board[3][3] = array4[0];
-            
+        case 's':      
+			moved = updateRightDown(A->board, 's');
             break;
             
         case 'a':
-            arrayReset(array1, A->board[0][0], A->board[0][1], A->board[0][2], A->board[0][3]);
-            arrayReset(array2, A->board[1][0], A->board[1][1], A->board[1][2], A->board[1][3]);
-            arrayReset(array3, A->board[2][0], A->board[2][1], A->board[2][2], A->board[2][3]);
-            arrayReset(array4, A->board[3][0], A->board[3][1], A->board[3][2], A->board[3][3]);
-            arrayReset(old_array1, A->board[0][0], A->board[0][1], A->board[0][2], A->board[0][3]);
-            arrayReset(old_array2, A->board[1][0], A->board[1][1], A->board[1][2], A->board[1][3]);
-            arrayReset(old_array3, A->board[2][0], A->board[2][1], A->board[2][2], A->board[2][3]);
-            arrayReset(old_array4, A->board[3][0], A->board[3][1], A->board[3][2], A->board[3][3]);
-            
-            pushCombine(pushZero(array1));
-            pushCombine(pushZero(array2));
-            pushCombine(pushZero(array3));
-            pushCombine(pushZero(array4));
-            moved = arrayEqual(old_array1, array1, 4) | arrayEqual(old_array2, array2, 4) | arrayEqual(old_array3, array3, 4) | arrayEqual(old_array4, array4, 4);
-            
-            A->board[0][0] = array1[0];
-            A->board[0][1] = array1[1];
-            A->board[0][2] = array1[2];
-            A->board[0][3] = array1[3];
-            A->board[1][0] = array2[0];
-            A->board[1][1] = array2[1];
-            A->board[1][2] = array2[2];
-            A->board[1][3] = array2[3];
-            A->board[2][0] = array3[0];
-            A->board[2][1] = array3[1];
-            A->board[2][2] = array3[2];
-            A->board[2][3] = array3[3];
-            A->board[3][0] = array4[0];
-            A->board[3][1] = array4[1];
-            A->board[3][2] = array4[2];
-            A->board[3][3] = array4[3];
-            
+			moved = updateLeftUp(A->board, 'a');
             break;
             
         case 'd':
-            arrayReset(array1, A->board[0][3], A->board[0][2], A->board[0][1], A->board[0][0]);
-            arrayReset(array2, A->board[1][3], A->board[1][2], A->board[1][1], A->board[1][0]);
-            arrayReset(array3, A->board[2][3], A->board[2][2], A->board[2][1], A->board[2][0]);
-            arrayReset(array4, A->board[3][3], A->board[3][2], A->board[3][1], A->board[3][0]);
-            arrayReset(old_array1, A->board[0][3], A->board[0][2], A->board[0][1], A->board[0][0]);
-            arrayReset(old_array2, A->board[1][3], A->board[1][2], A->board[1][1], A->board[1][0]);
-            arrayReset(old_array3, A->board[2][3], A->board[2][2], A->board[2][1], A->board[2][0]);
-            arrayReset(old_array4, A->board[3][3], A->board[3][2], A->board[3][1], A->board[3][0]);
-            
-            pushCombine(pushZero(array1));
-            pushCombine(pushZero(array2));
-            pushCombine(pushZero(array3));
-            pushCombine(pushZero(array4));
-            moved = arrayEqual(old_array1, array1, 4) | arrayEqual(old_array2, array2, 4) | arrayEqual(old_array3, array3, 4) | arrayEqual(old_array4, array4, 4);
-            
-            A->board[0][0] = array1[3];
-            A->board[0][1] = array1[2];
-            A->board[0][2] = array1[1];
-            A->board[0][3] = array1[0];
-            A->board[1][0] = array2[3];
-            A->board[1][1] = array2[2];
-            A->board[1][2] = array2[1];
-            A->board[1][3] = array2[0];
-            A->board[2][0] = array3[3];
-            A->board[2][1] = array3[2];
-            A->board[2][2] = array3[1];
-            A->board[2][3] = array3[0];
-            A->board[3][0] = array4[3];
-            A->board[3][1] = array4[2];
-            A->board[3][2] = array4[1];
-            A->board[3][3] = array4[0];
-            
+			moved = updateRightDown(A->board, 'd');
             break;
     }
     
