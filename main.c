@@ -360,6 +360,14 @@ void updateBoard(struct BOARD *A, char command){
         case 'd':
 			moved = updateRightDown(A->board, 'd');
             break;
+
+	case 'r':
+			restartBoard(A);
+	    break;
+
+	default:
+
+	    break;
     }
     
     if(moved)

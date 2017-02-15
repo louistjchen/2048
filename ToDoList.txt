@@ -21,13 +21,7 @@
 
 
 ========================================Louis' Tasks========================================
-1. restart game
-	a. function itself has been implemented, called restartBoard(struct BOARD *A);
-	b. discuss with Zeyu to see where to call restart, 2 possible places
-		i.  main function
-		ii. updateBoard function
-
-2. score count
+1. score count
 	a. have added variable "score" in struct BOARD
 	b. score counting algorithm
 		i.   initialize score to 0 in initBoard() & restartBoard()
