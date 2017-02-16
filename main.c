@@ -165,7 +165,7 @@ int findNextNonzeroEntry(int **board, int row, int col, char dir) {
 
 // function updateLeftUp
 // This function update the grid responding to left/up input detected.
-bool updateLeftUp(int **board, char dir) {
+bool updateLeftUp(struct BOARD* A, char dir) {
 	bool moved = false;
 	for (int i = 0; i < 4; i++) {
 		int j = 0;
@@ -177,33 +177,34 @@ bool updateLeftUp(int **board, char dir) {
 				k = 4;
 			}
 			else if (k == 3) { // The next date entry point is the last (i.e fourth) element of this row/column.
-				val = (dir == 'a') ? board[i][k] : board[k][i];
+				val = (dir == 'a') ? A->board[i][k] : A->board[k][i];
 				k = 4;
 			}
 			else if (k < 3) {
-				int n1 = findNextNonzeroEntry(board, (dir == 'a') ? i : k, (dir == 'a') ? k : i, dir);
+				int n1 = findNextNonzeroEntry(A->board, (dir == 'a') ? i : k, (dir == 'a') ? k : i, dir);
 				if (n1 > 3) { //The next nonzero date entry does not exist. thus make rest column/row all 0.
 					val = 0;
 					k = 4;
 				}
 				else if (n1 == 3) {
-					val = (dir == 'a') ? board[i][n1] : board[n1][i];
+					val = (dir == 'a') ? A->board[i][n1] : A->board[n1][i];
 					k = 4; //Set the next dataentry point to be 4, which is out of 0-3 range, make rest values in column/row all 0.
 				}
 				else if (n1 < 3) {
-					int n2 = findNextNonzeroEntry(board, (dir == 'a') ? i : n1 + 1, (dir == 'a') ? n1 + 1 : i, dir);
+					int n2 = findNextNonzeroEntry(A->board, (dir == 'a') ? i : n1 + 1, (dir == 'a') ? n1 + 1 : i, dir);
 					if (n2 > 3) {
-						val = (dir == 'a') ? board[i][n1] : board[n1][i]; //  Set current value to the only found nonzero value left, which is board[i][n1].
+						val = (dir == 'a') ? A->board[i][n1] : A->board[n1][i]; //  Set current value to the only found nonzero value left, which is A->board[i][n1].
 						k = 4;
 					}
 					else if (n2 <= 3) { // There are at least two nonzero values left to be continued, check if they equal.
-						if (dir == 'a' && board[i][n1] == board[i][n2]
-							|| dir == 'w' && board[n1][i] == board[n2][i]) {
-							val = ((dir == 'a') ? board[i][n1] : board[n1][i]) * 2;
+						if (dir == 'a' && A->board[i][n1] == A->board[i][n2]
+							|| dir == 'w' && A->board[n1][i] == A->board[n2][i]) {
+							val = ((dir == 'a') ? A->board[i][n1] : A->board[n1][i]) * 2;
+							A->score += val;
 							k = n2 + 1;
 						}
 						else {
-							val = (dir == 'a') ? board[i][n1] : board[n1][i];
+							val = (dir == 'a') ? A->board[i][n1] : A->board[n1][i];
 							k = n1 + 1;
 						}
 					}
@@ -211,13 +212,13 @@ bool updateLeftUp(int **board, char dir) {
 			}
 			if (dir == 'a') {
 				if (!moved)
-					moved = (board[j][i] == val) ? false : true;
-				board[i][j] = val;
+					moved = (A->board[j][i] == val) ? false : true;
+				A->board[i][j] = val;
 			}
 			else {
 				if (!moved)
-					moved = (board[j][i] == val) ? false : true;
-				board[j][i] = val;
+					moved = (A->board[j][i] == val) ? false : true;
+				A->board[j][i] = val;
 			}
 		}
 	}
@@ -226,7 +227,7 @@ bool updateLeftUp(int **board, char dir) {
 
 // function updateRightDown
 // This function update the grid responding to right/down input detected.
-bool updateRightDown(int **board, char dir) {
+bool updateRightDown(struct BOARD* A, char dir) {
 	bool moved = false;
 	for (int i = 0; i < 4; i++) {
 		int j = 3;
@@ -238,33 +239,34 @@ bool updateRightDown(int **board, char dir) {
 				k = -1;
 			}
 			else if (k == 0) { // The next date entry point is the last (i.e fourth) element of this row/column.
-				val = (dir == 'd') ? board[i][k] : board[k][i];
+				val = (dir == 'd') ? A->board[i][k] : A->board[k][i];
 				k = -1;
 			}
 			else if (k > 0) {
-				int n1 = findNextNonzeroEntry(board, (dir == 'd') ? i : k, (dir == 'd') ? k : i, dir);
+				int n1 = findNextNonzeroEntry(A->board, (dir == 'd') ? i : k, (dir == 'd') ? k : i, dir);
 				if (n1 < 0) { //The next nonzero date entry does not exist. thus make rest column/row all 0.
 					val = 0;
 					k = -1;
 				}
 				else if (n1 == 0) {
-					val = (dir == 'd') ? board[i][n1] : board[n1][i];
+					val = (dir == 'd') ? A->board[i][n1] : A->board[n1][i];
 					k = -1; //Set the next dataentry point to be 4, which is out of 0-3 range, make rest values in column/row all 0.
 				}
 				else if (n1 > 0) {
-					int n2 = findNextNonzeroEntry(board, (dir == 'd') ? i : n1 - 1, (dir == 'd') ? n1 - 1 : i, dir);
+					int n2 = findNextNonzeroEntry(A->board, (dir == 'd') ? i : n1 - 1, (dir == 'd') ? n1 - 1 : i, dir);
 					if (n2 < 0) {
-						val = (dir == 'd') ? board[i][n1] : board[n1][i]; //  Set current value to the only found nonzero value left, which is board[i][n1].
+						val = (dir == 'd') ? A->board[i][n1] : A->board[n1][i]; //  Set current value to the only found nonzero value left, which is A->board[i][n1].
 						k = -1;
 					}
 					else if (n2 >= 0) { // There are at least two nonzero values left to be continued, check if they equal.
-						if (dir == 'd' && board[i][n1] == board[i][n2]
-							|| dir == 's' && board[n1][i] == board[n2][i]) {
-							val = ((dir == 'd') ? board[i][n1] : board[n1][i]) * 2;
+						if (dir == 'd' && A->board[i][n1] == A->board[i][n2]
+							|| dir == 's' && A->board[n1][i] == A->board[n2][i]) {
+							val = ((dir == 'd') ? A->board[i][n1] : A->board[n1][i]) * 2;
+							A->score += val;
 							k = n2 - 1;
 						}
 						else {
-							val = (dir == 'd') ? board[i][n1] : board[n1][i];
+							val = (dir == 'd') ? A->board[i][n1] : A->board[n1][i];
 							k = n1 - 1;
 						}
 					}
@@ -272,13 +274,13 @@ bool updateRightDown(int **board, char dir) {
 			}
 			if (dir == 'd') {
 				if (!moved)
-					moved = (board[i][j] == val) ? false : true;
-				board[i][j] = val;
+					moved = (A->board[i][j] == val) ? false : true;
+				A->board[i][j] = val;
 			}
 			else {
 				if (!moved)
-					moved = (board[j][i] == val) ? false : true;
-				board[j][i] = val;
+					moved = (A->board[j][i] == val) ? false : true;
+				A->board[j][i] = val;
 			}
 		}
 	}
@@ -353,19 +355,19 @@ void updateBoard(struct BOARD *A, char command){
     switch(command){
             
         case 'w':      
-			moved = updateLeftUp(A->board, 'w');
+			moved = updateLeftUp(A, 'w');
             break;
             
         case 's':      
-			moved = updateRightDown(A->board, 's');
+			moved = updateRightDown(A, 's');
             break;
             
         case 'a':
-			moved = updateLeftUp(A->board, 'a');
+			moved = updateLeftUp(A, 'a');
             break;
             
         case 'd':
-			moved = updateRightDown(A->board, 'd');
+			moved = updateRightDown(A, 'd');
             break;
 
 	case 'r':
