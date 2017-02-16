@@ -113,13 +113,16 @@ void printBoard(struct BOARD *A){
     return;
 }
 
+//function findNextNonzeroEntry
+//This function acts as a helper function to updateLeftUp/updateRightDown.
+//It finds the next non zero cell with a given start point and direction.
 int findNextNonzeroEntry(int **board, int row, int col, char dir) {
 	
 	int result = 0;
 
 	switch (dir) {
 	case 'a': {
-		for (int i = col; col < 4; col++) { // search in increasing direction, which is rightward.
+		for (col; col < 4; col++) { // search in increasing direction, which is rightward.
 			if (board[row][col] != 0)
 				return col;
 		}
@@ -128,7 +131,7 @@ int findNextNonzeroEntry(int **board, int row, int col, char dir) {
 	}
 
 	case 'w': {
-		for (int i = row; row < 4; row++) { // search in increasing direction, which is rightward.
+		for (row; row < 4; row++) { // search in increasing direction, which is downward.
 			if (board[row][col] != 0)
 				return row;
 		}
@@ -137,7 +140,7 @@ int findNextNonzeroEntry(int **board, int row, int col, char dir) {
 	}
 
 	case 'd': {
-		for (int i = col; col >= 0 ; col--) { // search in increasing direction, which is rightward.
+		for (col; col >= 0 ; col--) { // search in decreasing direction, which is leftward.
 			if (board[row][col] != 0)
 				return col;
 		}
@@ -146,7 +149,7 @@ int findNextNonzeroEntry(int **board, int row, int col, char dir) {
 	}
 
 	case 's': {
-		for (int i = row; row >= 0; row--) { // search in increasing direction, which is rightward.
+		for (row; row >= 0; row--) { // search in decreasing direction, which is upward.
 			if (board[row][col] != 0)
 				return row;
 		}
@@ -160,6 +163,8 @@ int findNextNonzeroEntry(int **board, int row, int col, char dir) {
 	return result;
 }
 
+// function updateLeftUp
+// This function update the grid responding to left/up input detected.
 bool updateLeftUp(int **board, char dir) {
 	bool moved = false;
 	for (int i = 0; i < 4; i++) {
@@ -219,6 +224,8 @@ bool updateLeftUp(int **board, char dir) {
 	return moved;
 }
 
+// function updateRightDown
+// This function update the grid responding to right/down input detected.
 bool updateRightDown(int **board, char dir) {
 	bool moved = false;
 	for (int i = 0; i < 4; i++) {
