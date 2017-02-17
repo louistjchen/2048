@@ -99,16 +99,16 @@ void restartBoard(struct BOARD *A){
 void printBoard(struct BOARD *A){
     
     printf("\nCurrent board is as follows\n");
-    printf("===========================\n");
+    printf("================================\n");
     
     for(int i = 0; i < 4; i++){
         for(int j = 0; j < 4; j++)
-            if(A->board[i][j] == 0) printf("     ");
-            else printf("%5.d", A->board[i][j]);
+            if(A->board[i][j] == 0) printf("       |");
+            else printf("%5.d  |", A->board[i][j]);
         printf("\n\n");
     }
     
-    printf("===========================\n");
+    printf("===============================\n");
     printf("Your current score: %d\n", A->score);
     return;
 }
@@ -370,10 +370,6 @@ void updateBoard(struct BOARD *A, char command){
 			moved = updateRightDown(A, 'd');
             break;
 
-	case 'r':
-			restartBoard(A);
-	    break;
-
 	default:
 
 	    break;
@@ -455,7 +451,8 @@ int main(int argc, const char * argv[]) {
 
     char command;
     char empty;
-    
+	bool gameOver = false;
+
     struct BOARD *A = NULL;
     
     A = initBoard(A);
@@ -481,14 +478,27 @@ int main(int argc, const char * argv[]) {
 
     while(command != 'q' ){
         
+		if (gameOver) {
+			if (command == 'r') {
+				restartBoard(A);
+				gameOver = true;
+			}
+			else
+				goto INPUT;
+		}
+
         updateBoard(A, command);
         printBoard(A);
         
         if(!playable(A)){
-            printf("Gameover!\n");
-            break;
+			gameOver = true;
+            printf("=====G=A=M=E===O=V=E=R=====!\n");
+			printf("YOUR FINAL SCORE IS: %d !\n", A->score);
+			printf("PRESS R TO RESTART!")
+			goto INPUT;
+			continue;
         }
-        
+INPUT:       
         printf("Please enter command (h: help): ");
         command = getchar();
 
